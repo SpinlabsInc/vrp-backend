@@ -1,4 +1,4 @@
-// lambda/index.js
+//lambda/index.js
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const TABLE_NAME = process.env.TABLE_NAME;
