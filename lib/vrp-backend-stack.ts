@@ -5,6 +5,7 @@ import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as codepipeline from "aws-cdk-lib/aws-codepipeline";
 import * as codepipeline_actions from "aws-cdk-lib/aws-codepipeline-actions";
 import * as codebuild from "aws-cdk-lib/aws-codebuild";
+import * as iam from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 
 export class VrpBackendStack extends cdk.Stack {
@@ -63,6 +64,16 @@ export class VrpBackendStack extends cdk.Stack {
         buildImage: codebuild.LinuxBuildImage.STANDARD_5_0, // Ensure using latest environment
       },
     });
+
+    // Grant SSM Parameter read permissions to the CodeBuild project role
+    project.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["ssm:GetParameter"],
+        resources: [
+          "arn:aws:ssm:us-east-1:448049814374:parameter/cdk-bootstrap/hnb659fds/version",
+        ],
+      })
+    );
 
     const buildAction = new codepipeline_actions.CodeBuildAction({
       actionName: "Build",
