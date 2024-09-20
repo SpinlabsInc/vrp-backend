@@ -1,0 +1,22 @@
+# .github/workflows/deploy.yml
+name: Deploy Backend via AWS CodePipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  trigger-codepipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Trigger AWS CodePipeline
+        run: |
+          aws codepipeline start-pipeline-execution --name BackendDeploymentPipeline
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
