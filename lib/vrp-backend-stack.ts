@@ -21,7 +21,7 @@ export class VrpBackendStack extends cdk.Stack {
     // Create the Lambda function
     const lambdaFunction = new lambda.Function(this, "ApiLambdaFunction", {
       runtime: lambda.Runtime.NODEJS_16_X,
-      code: lambda.Code.fromAsset("./lambda"), // Directory containing lambda function code
+      code: lambda.Code.fromAsset("./lambda"), // Ensure the handler exists here
       handler: "index.handler",
       environment: {
         TABLE_NAME: table.tableName,
@@ -50,7 +50,7 @@ export class VrpBackendStack extends cdk.Stack {
       new codepipeline_actions.CodeStarConnectionsSourceAction({
         actionName: "GitHub_Source",
         connectionArn:
-          "arn:aws:codeconnections:ap-southeast-2:448049814374:connection/da0be10f-6a19-4f21-8860-f6ce12c97e4f", // Your CodeStar connection ARN
+          "arn:aws:codeconnections:ap-southeast-2:448049814374:connection/da0be10f-6a19-4f21-8860-f6ce12c97e4f", // Ensure CodeStar connection is set up correctly
         owner: "SpinlabsInc",
         repo: "vrp-backend",
         branch: "main", // Replace with your branch
@@ -61,7 +61,7 @@ export class VrpBackendStack extends cdk.Stack {
     const project = new codebuild.PipelineProject(this, "BuildProject", {
       buildSpec: codebuild.BuildSpec.fromSourceFilename("buildspec.yml"),
       environment: {
-        buildImage: codebuild.LinuxBuildImage.STANDARD_5_0, // Ensure using latest environment
+        buildImage: codebuild.LinuxBuildImage.STANDARD_5_0, // Ensure the latest environment
       },
     });
 
