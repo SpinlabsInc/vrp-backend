@@ -7,12 +7,9 @@ phases:
       - npm install
   build:
     commands:
-      - npm run build
-      - cdk synth
-  post_build:
-    commands:
-      - cdk deploy --require-approval never
+      - npx cdk synth
+      - npx cdk deploy --require-approval never
+
 artifacts:
   files:
     - "**/*"
-  discard-paths: yes
