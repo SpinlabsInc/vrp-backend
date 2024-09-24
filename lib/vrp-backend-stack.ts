@@ -8,6 +8,7 @@ import * as codepipeline from "aws-cdk-lib/aws-codepipeline";
 import * as codepipelineActions from "aws-cdk-lib/aws-codepipeline-actions";
 import * as codebuild from "aws-cdk-lib/aws-codebuild";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as ssm from "aws-cdk-lib/aws-ssm";
 
 export class VrpBackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -43,6 +44,12 @@ export class VrpBackendStack extends cdk.Stack {
     items.addMethod("GET", getItemIntegration); // GET /items
     items.addMethod("POST", getItemIntegration); // POST /items
 
+    // Store API Gateway URL in SSM Parameter Store
+    new ssm.StringParameter(this, "ApiGatewayUrl", {
+      parameterName: "/my-app/api-url",
+      stringValue: api.url, // Store the API Gateway URL
+    });
+
     // Create S3 bucket to store code artifacts
     const artifactBucket = new s3.Bucket(this, "ArtifactBucket", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -67,7 +74,7 @@ export class VrpBackendStack extends cdk.Stack {
         buildImage: codebuild.LinuxBuildImage.STANDARD_5_0,
         privileged: true,
       },
-      buildSpec: codebuild.BuildSpec.fromSourceFilename("buildspec.yml"),
+      buildSpec: codebuild.BuildSpec.fromSourceFilename("buildspec.yml"), // Buildspec for the pipeline
     });
 
     // Add permissions to allow the build project to access SSM and other resources
@@ -77,11 +84,12 @@ export class VrpBackendStack extends cdk.Stack {
         resources: [
           "arn:aws:ssm:us-east-1:448049814374:parameter/cdk-bootstrap/hnb659fds/version",
           "arn:aws:ssm:us-east-1:448049814374:parameter/cdk-bootstrap/*",
+          "arn:aws:ssm:us-east-1:448049814374:parameter/my-app/api-url", // Specific to the API URL in SSM
         ],
       })
     );
 
-    // Allow the build project to deploy CDK stacks and perform any necessary actions
+    // Allow the build project to deploy CDK stacks and perform necessary actions
     buildProject.addToRolePolicy(
       new iam.PolicyStatement({
         actions: [
