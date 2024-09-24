@@ -7,8 +7,8 @@ phases:
       - npm install
   build:
     commands:
-      - npx cdk synth
-      - npx cdk deploy --require-approval never
+      - cdk synth
+      - cdk deploy --require-approval never
 
 artifacts:
   files:
