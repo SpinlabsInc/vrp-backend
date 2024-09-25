@@ -2,14 +2,33 @@ version: 0.2
 
 phases:
   install:
+    runtime-versions:
+      python: 3.9
+  pre_build:
     commands:
-      - npm install -g aws-cdk
-      - npm install
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
   build:
     commands:
-      - cdk synth
-      - cdk deploy --require-approval never
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build -t $ECR_REPO_URI:$IMAGE_TAG .
+      - docker tag $ECR_REPO_URI:$IMAGE_TAG $ECR_REPO_URI:latest
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push $ECR_REPO_URI:$IMAGE_TAG
+      - docker push $ECR_REPO_URI:latest
+      - echo Writing image definitions file...
+      - printf '{"ImageURI":"%s"}' $ECR_REPO_URI:$IMAGE_TAG > imageDetail.json
+      - echo Writing task definition file...
+      - sed -e "s|<CONTAINER_URI>|$ECR_REPO_URI:$IMAGE_TAG|g" taskdef.json.template > taskdef.json
+      - echo Writing AppSpec file...
+      - cp appspec.yaml appspec.yaml
 
 artifacts:
   files:
-    - "**/*"
+    - imageDetail.json
+    - taskdef.json
+    - appspec.yaml
