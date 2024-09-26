@@ -1,4 +1,0 @@
-Flask==2.0.1
-ortools==9.0.9048
-geopy==2.2.0
-gunicorn==20.1.0
